@@ -1,14 +1,20 @@
 /* eslint-disable */
 
 var ACCESS_TOKEN = "";
+var HIDE_CLOSED_PRS = false;
+var HIDE_LABELS_ON_CLOSED_PRS = true;
 var IN_REVIEW_COLUMN;
 var JIRA_HOSTNAME = window.location.hostname;
 
 //get settings for the chrome extension
 chrome.storage.sync.get({
-    github_access_token: ''
+    github_access_token: '',
+    hide_labels_on_closed_prs: true,
+    hide_closed_prs: false
 }, function (items) {
     ACCESS_TOKEN = items.github_access_token;
+    HIDE_CLOSED_PRS = items.hide_closed_prs;
+    HIDE_LABELS_ON_CLOSED_PRS = items.hide_labels_on_closed_prs;
     addPRLabels();
 });
 
@@ -49,29 +55,31 @@ function addPRLabels() {
                             var buildURL = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + this.id.replace("#", "") + "?access_token=" + ACCESS_TOKEN;
 
                             $.getJSON(buildURL, function (data) {
-                                var buildDiv = "";
-                                buildDiv += "<div style=\"margin-top:7px;\">";
-                                buildDiv += "<span style=\"cursor:pointer;font-size:12px;color: rgb(107, 119, 140);\" onclick=\"event.stopPropagation();window.open('" + data.html_url + "', '_blank');\">" + prid + "</span>: ";
-                                if (prstatus == "OPEN") {
-                                    buildDiv += "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-complete\" style=\"color:#0052cc !important;border-color:#b3d4ff !important;\">OPEN</span>";
-                                } else if (prstatus == "MERGED") {
-                                    buildDiv += "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-success\">MERGED</span>";
-                                } else if (prstatus == "DECLINED") {
-                                    buildDiv += "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-error\">DECLINED</span>";
-                                } else {
-                                    buildDiv += "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle\">" + prstatus + "</span>";
-                                }
-                                buildDiv += "<span style=\"font-size:10px;font-style:italic;padding-left:5px;\">" + data.head.repo.name + "</span><br/>";
+                                if (prstatus != "DECLINED" || !HIDE_CLOSED_PRS) {
+                                    var buildDiv = "";
+                                    buildDiv += "<div style=\"margin-top:7px;\">";
+                                    buildDiv += "<span style=\"cursor:pointer;font-size:12px;color: rgb(107, 119, 140);\" onclick=\"event.stopPropagation();window.open('" + data.html_url + "', '_blank');\">" + prid + "</span>: ";
+                                    if (prstatus == "OPEN") {
+                                        buildDiv += "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-complete\" style=\"color:#0052cc !important;border-color:#b3d4ff !important;\">OPEN</span>";
+                                    } else if (prstatus == "MERGED") {
+                                        buildDiv += "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-success\">MERGED</span>";
+                                    } else if (prstatus == "DECLINED") {
+                                        buildDiv += "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-error\">DECLINED</span>";
+                                    } else {
+                                        buildDiv += "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle\">" + prstatus + "</span>";
+                                    }
+                                    buildDiv += "<span style=\"font-size:10px;font-style:italic;padding-left:5px;\">" + data.head.repo.name + "</span><br/>";
 
-                                //TODO: Add an option to show labels for declined PR's
-                                if (prstatus != "DECLINED") {
-                                    $.each(data.labels, function () {
-                                        buildDiv += "<div style=\"margin-top:3px; height: 20px; padding: 0.15em 4px; font-size:12px; font-weight:600 line-height:15px; border-radius: 2px; background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";\">" + this.name + "</div>";
-                                    });
-                                }
-                                buildDiv += "</div>";
+                                    //TODO: Add an option to show labels for declined PR's
+                                    if (prstatus != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
+                                        $.each(data.labels, function () {
+                                            buildDiv += "<div style=\"margin-top:3px; height: 20px; padding: 0.15em 4px; font-size:12px; font-weight:600 line-height:15px; border-radius: 2px; background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";\">" + this.name + "</div>";
+                                        });
+                                    }
+                                    buildDiv += "</div>";
 
-                                $(card).append(buildDiv);
+                                    $(card).append(buildDiv);
+                                }
                             });
                         });
                     }

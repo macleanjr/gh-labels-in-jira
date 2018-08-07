@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html>
-<head><title>Extension Options</title></head>
-<body>
-Github Access Token: <input id="github_access_token" type="text" length="50"/>
 
-<div id="status"></div>
-<button id="save">Save</button>
-<script src="/options.js"></script>
+<head>
+    <title>Extension Options</title>
+</head>
+
+<body>
+    Github Access Token: <input id="github_access_token" type="text" length="50" /><br/><br/> Hide labels on closed PR's: <input type="checkbox" id="hide_labels_on_closed_prs" /><br/> Hide closed PR's: <input type="checkbox" id="hide_closed_prs" />
+
+    <div id="status"></div>
+    <button id="save">Save</button>
+    <script src="/options.js"></script>
 
 </body>
+
 </html>
