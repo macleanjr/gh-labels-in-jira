@@ -29,7 +29,7 @@ function restore_options() {
         github_access_token: '',
         hide_labels_on_closed_prs: true,
         hide_closed_prs: false,
-        pr_columns: '',
+        pr_columns: 'In Review, Github Review',
     }, function (items) {
         document.getElementById('github_access_token').value = items.github_access_token;
         document.getElementById('hide_labels_on_closed_prs').checked = items.hide_labels_on_closed_prs;
