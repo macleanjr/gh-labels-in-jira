@@ -35,16 +35,33 @@ chrome.storage.sync.get({
     }
 });
 
+// Listen for a click on our tab to fire off our function
+window.addEventListener("message", function (event) {
+    if (event.source != window)
+        return;
+    switch (event.data.type) {
+        case "refreshPRs":
+            $("[data-issue-id='" + event.data.params.issueKey + "']").find(".gh-labels-in-jira-wrapper").remove();
+            populateIssueCard($("[data-issue-id='" + event.data.params.issueKey + "']"));
+            break;
+    }
+});
+
 function populateIssueCard(card) {
     $.getJSON("https://" + JIRA_HOSTNAME + "/rest/dev-status/1.0/issue/detail?issueId=" + $(card).attr("data-issue-id") + "&applicationType=github&dataType=pullrequest", function (data) {
         if (data.detail[0].pullRequests.length == 0) {
             // no PR's found
-            $(card).find(".ghx-stat-fields .ghx-stat-1").append("<span class=\"ghx-field gh-labels-in-jira\" data-tooltip=\"0 pull requests\">" + NO_PR_ICON + "</span>");
+            if ($(card).find(".gh-labels-in-jira").length == 0)
+                $(card).find(".ghx-stat-fields .ghx-stat-1").append("<span class=\"ghx-field gh-labels-in-jira\" data-tooltip=\"0 pull requests\">" + NO_PR_ICON + "</span>");
         } else {
-            $(card).find(".ghx-stat-fields .ghx-stat-1").append("<span class=\"ghx-field gh-labels-in-jira\" data-tooltip=\"" + data.detail[0].pullRequests.length + " pull request(s)\">" + PR_ICON + "</span>");
+            if ($(card).find(".gh-labels-in-jira").length == 0)
+                $(card).find(".ghx-stat-fields .ghx-stat-1").append("<span class=\"ghx-field gh-labels-in-jira\" style=\"cursor:pointer;\" data-tooltip=\"" + data.detail[0].pullRequests.length + " pull request(s)\" onclick=\"event.stopPropagation();window.postMessage({ type: 'refreshPRs', params: { issueKey: '" + $(card).attr("data-issue-id") + "'} }, '*');\">" + PR_ICON + "</span>");
+
+            $(card).append("<div class=\"gh-labels-in-jira-wrapper\"></div>");
+            var wrapper = $(card).find(".gh-labels-in-jira-wrapper");
 
             // heading for pull requests
-            $(card).append("<div id=\"gh-labels-in-jira_prs\" style=\"border-bottom: 2px solid #dfe1e6; color: #6c798f; font-weight:500; font-size:12px;\">Pull Requests</div>");
+            $(wrapper).append("<div id=\"gh-labels-in-jira_prs\" style=\"border-bottom: 2px solid #dfe1e6; color: #6c798f; font-weight:500; font-size:12px;\">Pull Requests</div>");
 
             $.each(data.detail[0].pullRequests, function () {
                 var prid = this.id;
@@ -80,7 +97,7 @@ function populateIssueCard(card) {
 
                             buildDiv += "</div>";
 
-                            $(card).append(buildDiv);
+                            $(wrapper).append(buildDiv);
 
                         });
                     }
