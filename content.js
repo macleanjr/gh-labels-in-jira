@@ -4,11 +4,15 @@
 var ACCESS_TOKEN = "";
 var HIDE_CLOSED_PRS = false;
 var HIDE_LABELS_ON_CLOSED_PRS = true;
+var FF_CODE_REVIEWERS = false;
 var JIRA_HOSTNAME = window.location.hostname;
 var PR_COLUMNS = ["In Review", "Github Review"];
 var JIRA_COLUMNS = [];
 var NO_PR_ICON = "<svg viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill=\"#ccc\" fill-rule=\"evenodd\" d=\"M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z\"></path></svg>";
 var PR_ICON = "<svg viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill=\"#555\" fill-rule=\"evenodd\" d=\"M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z\"></path></svg>";
+var GREEN_CHECK_ICON = "<svg style=\"float:right;margin-left:5px;\" class=\"octicon octicon-check text-green\" viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill=\"#28a745\" fill-rule=\"evenodd\" d=\"M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z\"></path></svg>";
+
+
 
 // get settings for the chrome extension
 chrome.storage.sync.get({
@@ -16,10 +20,12 @@ chrome.storage.sync.get({
     hide_labels_on_closed_prs: true,
     hide_closed_prs: false,
     pr_columns: "",
+    ff_code_reviewers: false
 }, function (items) {
     ACCESS_TOKEN = items.github_access_token;
     HIDE_CLOSED_PRS = items.hide_closed_prs;
     HIDE_LABELS_ON_CLOSED_PRS = items.hide_labels_on_closed_prs;
+    FF_CODE_REVIEWERS = items.ff_code_reviewers;
 
     if (items.pr_columns) {
         PR_COLUMNS = items.pr_columns
@@ -90,9 +96,13 @@ function populateIssueCard(card) {
                     if (prstatus != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
                         var buildURL = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + this.id.replace("#", "") + "?access_token=" + ACCESS_TOKEN;
                         $.getJSON(buildURL, function (data) {
-
+                            var pull_id = data.id;
                             $.each(data.labels, function () {
-                                buildDiv += "<div style=\"margin-top:3px; height: 20px; padding: 0.15em 4px; font-size:12px; font-weight:600 line-height:15px; border-radius: 2px; background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";\">" + this.name + "</div>";
+                                var label_id = pull_id + "-" + this.id;
+                                buildDiv += "<div data-label-id=\"" + label_id + "\" style=\"margin-top:3px; height: 20px; padding: 0.15em 4px; font-size:12px; font-weight:600 line-height:15px; border-radius: 2px; background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";\">" + this.name + "</div>";
+                                if (FF_CODE_REVIEWERS && (this.name == "In Code Review" || this.name == "Ready for Code Review")) {
+                                    checkCodeReviewers(owner, repo, prid.replace("#", ""), label_id);
+                                }
                             });
 
                             buildDiv += "</div>";
@@ -104,6 +114,17 @@ function populateIssueCard(card) {
                 }
             });
         }
+    });
+}
+
+function checkCodeReviewers(owner, repo, prid, label_id) {
+    var url = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + prid + "/reviews?access_token=" + ACCESS_TOKEN;
+    $.getJSON(url, function (data) {
+        $.each(data, function () {
+            if (this.state == "APPROVED") {
+                $("div[data-label-id='" + label_id + "']").append(GREEN_CHECK_ICON);
+            }
+        });
     });
 }
 
