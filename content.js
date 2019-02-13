@@ -4,6 +4,7 @@
 var ACCESS_TOKEN = "";
 var HIDE_CLOSED_PRS = false;
 var HIDE_LABELS_ON_CLOSED_PRS = true;
+var FF_CODE_REVIEWERS = false;
 var JIRA_HOSTNAME = window.location.hostname;
 var PR_COLUMNS = ["In Review", "Github Review"];
 var JIRA_COLUMNS = [];
@@ -19,10 +20,12 @@ chrome.storage.sync.get({
     hide_labels_on_closed_prs: true,
     hide_closed_prs: false,
     pr_columns: "",
+    ff_code_reviewers: false
 }, function (items) {
     ACCESS_TOKEN = items.github_access_token;
     HIDE_CLOSED_PRS = items.hide_closed_prs;
     HIDE_LABELS_ON_CLOSED_PRS = items.hide_labels_on_closed_prs;
+    FF_CODE_REVIEWERS = items.ff_code_reviewers;
 
     if (items.pr_columns) {
         PR_COLUMNS = items.pr_columns
@@ -97,7 +100,7 @@ function populateIssueCard(card) {
                             $.each(data.labels, function () {
                                 var label_id = pull_id + "-" + this.id;
                                 buildDiv += "<div data-label-id=\"" + label_id + "\" style=\"margin-top:3px; height: 20px; padding: 0.15em 4px; font-size:12px; font-weight:600 line-height:15px; border-radius: 2px; background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";\">" + this.name + "</div>";
-                                if (this.name == "In Code Review" || this.name == "Ready for Code Review") {
+                                if (FF_CODE_REVIEWERS && (this.name == "In Code Review" || this.name == "Ready for Code Review")) {
                                     checkCodeReviewers(owner, repo, prid.replace("#", ""), label_id);
                                 }
                             });
