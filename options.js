@@ -6,12 +6,14 @@ function save_options() {
     var hide_labels_on_closed_prs = document.getElementById('hide_labels_on_closed_prs').checked;
     var hide_closed_prs = document.getElementById('hide_closed_prs').checked;
     var pr_columns = document.getElementById('pr_columns').value;
+    var ff_code_reviewers = document.getElementById('ff_code_reviewers').checked;
 
     chrome.storage.sync.set({
         github_access_token: github_access_token,
         hide_labels_on_closed_prs: hide_labels_on_closed_prs,
         hide_closed_prs: hide_closed_prs,
         pr_columns: pr_columns,
+        ff_code_reviewers: ff_code_reviewers
     }, function () {
         // Update status to let user know options were saved.
         var status = document.getElementById('status');
@@ -30,11 +32,13 @@ function restore_options() {
         hide_labels_on_closed_prs: true,
         hide_closed_prs: false,
         pr_columns: 'In Review, Github Review',
+        ff_code_reviewers: false
     }, function (items) {
         document.getElementById('github_access_token').value = items.github_access_token;
         document.getElementById('hide_labels_on_closed_prs').checked = items.hide_labels_on_closed_prs;
         document.getElementById('hide_closed_prs').checked = items.hide_closed_prs;
         document.getElementById('pr_columns').value = items.pr_columns;
+        document.getElementById('ff_code_reviewers').checked = items.ff_code_reviewers;
     });
 }
 
