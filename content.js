@@ -98,7 +98,7 @@ function populateIssueCard(card) {
                         $.getJSON(buildURL, function (data) {
                             var pull_id = data.id;
                             $.each(data.labels, function () {
-                                var label_id = pull_id + "-" + this.id;
+                                var label_id = $(card).data("issue-key") + "-" + pull_id + "-" + this.id;
                                 buildDiv += "<div data-label-id=\"" + label_id + "\" style=\"margin-top:3px; height: 20px; padding: 0.15em 4px; font-size:12px; font-weight:600 line-height:15px; border-radius: 2px; background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";\">" + this.name + "</div>";
                                 if (FF_CODE_REVIEWERS && (this.name == "In Code Review" || this.name == "Ready for Code Review")) {
                                     checkCodeReviewers(owner, repo, prid.replace("#", ""), label_id);
