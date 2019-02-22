@@ -82,8 +82,6 @@ function populateIssueCard(card) {
                     var pullRequestNode = document.createElement("div");
                     pullRequestNode.classList.add("pullRequestNode");
 
-                    //$(pullRequestNode).append();
-
                     $(pullRequestNode).append("<span style=\"cursor:pointer;font-size:12px;color: rgb(107, 119, 140);\" onclick=\"event.stopPropagation();window.open('" + pr_link + "', '_blank');\">" + prid + "</span>: ");
                     if (prstatus == "OPEN") {
                         $(pullRequestNode).append("<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-complete\" style=\"color:#0052cc !important;border-color:#b3d4ff !important;\">OPEN</span>");
@@ -102,8 +100,9 @@ function populateIssueCard(card) {
                         $.getJSON(buildURL, function (data) {
                             var pull_id = data.id;
                             $.each(data.labels, function () {
-                                var labelNode = document.createElement("div");
                                 var label_id = $(card).data("issue-key") + "-" + pull_id + "-" + this.id;
+
+                                var labelNode = document.createElement("div");
                                 labelNode.setAttribute("data-label-id", label_id);
                                 labelNode.setAttribute("style", "background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";");
                                 labelNode.classList.add("pull-request-label");
@@ -128,17 +127,13 @@ function populateIssueCard(card) {
 }
 
 function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labelNode) {
-    //add requested reviewers to the field
-    //TODO: This won't work because the element isn't on the page yet
 
+    //add requested reviewers to the field
     if (requested_reviewers.length > 0) {
         for (var i = 0; i < requested_reviewers.length; i++) {
             $(labelNode).append(REVIEW_PENDING.replace("*TOOLTIP*", requested_reviewers[i].login));
         }
     }
-
-
-
 
     var url = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + prid + "/reviews?access_token=" + ACCESS_TOKEN;
     $.getJSON(url, function (data) {
