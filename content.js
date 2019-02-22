@@ -102,11 +102,18 @@ function populateIssueCard(card) {
                         $.getJSON(buildURL, function (data) {
                             var pull_id = data.id;
                             $.each(data.labels, function () {
+                                var labelNode = document.createElement("div");
                                 var label_id = $(card).data("issue-key") + "-" + pull_id + "-" + this.id;
-                                $(pullRequestNode).append("<div class=\"pull-request-label\" data-label-id=\"" + label_id + "\" style=\" background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";\">" + this.name + "</div>");
+                                labelNode.setAttribute("data-label-id", label_id);
+                                labelNode.setAttribute("style", "background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";");
+                                labelNode.classList.add("pull-request-label");
+                                labelNode.textContent = this.name;
+
                                 if (FF_CODE_REVIEWERS && (this.name == "In Code Review" || this.name == "Ready for Code Review")) {
-                                    addCodeReviewers(owner, repo, prid.replace("#", ""), label_id, data.requested_reviewers, pullRequestNode);
+                                    addCodeReviewers(owner, repo, prid.replace("#", ""), label_id, data.requested_reviewers, labelNode);
                                 }
+
+                                $(pullRequestNode).append(labelNode);
 
                             });
 
