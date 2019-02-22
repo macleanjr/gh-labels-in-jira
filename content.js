@@ -105,8 +105,9 @@ function populateIssueCard(card) {
                                 var label_id = $(card).data("issue-key") + "-" + pull_id + "-" + this.id;
                                 $(pullRequestNode).append("<div class=\"pull-request-label\" data-label-id=\"" + label_id + "\" style=\" background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";\">" + this.name + "</div>");
                                 if (FF_CODE_REVIEWERS && (this.name == "In Code Review" || this.name == "Ready for Code Review")) {
-                                    addCodeReviewers(owner, repo, prid.replace("#", ""), label_id, data.requested_reviewers);
+                                    addCodeReviewers(owner, repo, prid.replace("#", ""), label_id, data.requested_reviewers, pullRequestNode);
                                 }
+
                             });
 
                             $(wrapper).append(pullRequestNode);
@@ -119,16 +120,17 @@ function populateIssueCard(card) {
     });
 }
 
-function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers) {
+function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, pullRequestNode) {
     //add requested reviewers to the field
     //TODO: This won't work because the element isn't on the page yet
     /*
-    if (requested_reviewers.length > 0) {
-        for (var i = 0; i < requested_reviewers.length; i++) {
-            //$("div[data-label-id='" + label_id + "']").append("test");
+        if (requested_reviewers.length > 0) {
+            for (var i = 0; i < requested_reviewers.length; i++) {
+                $(pullRequestNode).append("test");
+            }
         }
-    }
-    */
+        */
+
 
 
     var url = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + prid + "/reviews?access_token=" + ACCESS_TOKEN;
