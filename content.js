@@ -10,8 +10,8 @@ var PR_COLUMNS = ["In Review", "Github Review"];
 var JIRA_COLUMNS = [];
 var NO_PR_ICON = "<svg viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill=\"#ccc\" fill-rule=\"evenodd\" d=\"M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z\"></path></svg>";
 var PR_ICON = "<svg viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill=\"#555\" fill-rule=\"evenodd\" d=\"M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z\"></path></svg>";
-var GREEN_CHECK_ICON = "<div style=\"float:right;margin-left:5px;\" class=\"code-review\"><svg class=\"octicon octicon-check text-green\" viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill=\"#28a745\" fill-rule=\"evenodd\" d=\"M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z\"></path></svg><span class=\"tooltiptext\">*TOOLTIP*</span></div>";
-var REVIEW_PENDING = "<div style=\"float:right;margin-left:5px;\" class=\"code-review\"><svg class=\"octicon octicon-primitive-dot bg-pending\" viewBox=\"0 0 8 16\" version=\"1.1\" width=\"8\" height=\"16\" aria-hidden=\"true\"><path fill=\"#dbab09\" fill-rule=\"evenodd\" d=\"M0 8c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z\"></path></svg><span class=\"tooltiptext\">*TOOLTIP*</span></div>";
+var GREEN_CHECK_ICON = "<div style=\"float:right;margin-left:5px;margin-top:1px;\" class=\"code-review\"><svg class=\"octicon octicon-check text-green\" viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill=\"#28a745\" fill-rule=\"evenodd\" d=\"M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z\"></path></svg><span class=\"tooltiptext\">*TOOLTIP* approved these changes</span></div>";
+var REVIEW_PENDING = "<div style=\"float:right;margin-left:5px;margin-top:2px;\" class=\"code-review\"><svg class=\"octicon octicon-primitive-dot bg-pending\" viewBox=\"0 0 8 16\" version=\"1.1\" width=\"8\" height=\"16\" aria-hidden=\"true\"><path fill=\"#dbab09\" fill-rule=\"evenodd\" d=\"M0 8c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z\"></path></svg><span class=\"tooltiptext\">Awaiting requested review from *TOOLTIP*</span></div>";
 
 
 
@@ -127,16 +127,16 @@ function populateIssueCard(card) {
     });
 }
 
-function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, pullRequestNode) {
+function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labelNode) {
     //add requested reviewers to the field
     //TODO: This won't work because the element isn't on the page yet
-    /*
-        if (requested_reviewers.length > 0) {
-            for (var i = 0; i < requested_reviewers.length; i++) {
-                $(pullRequestNode).append("test");
-            }
+
+    if (requested_reviewers.length > 0) {
+        for (var i = 0; i < requested_reviewers.length; i++) {
+            $(labelNode).append(REVIEW_PENDING.replace("*TOOLTIP*", requested_reviewers[i].login));
         }
-        */
+    }
+
 
 
 
@@ -152,7 +152,7 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, pull
                 }
 
                 if (addCheckmark)
-                    $("div[data-label-id='" + label_id + "']").append(GREEN_CHECK_ICON.replace("*TOOLTIP*", this.user.login));
+                    $("div[data-label-id='" + label_id + "']").prepend(GREEN_CHECK_ICON.replace("*TOOLTIP*", this.user.login));
             }
         });
     });
