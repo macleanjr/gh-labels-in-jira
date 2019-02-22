@@ -34,3 +34,16 @@
     border-style: solid;
     border-color: transparent transparent black transparent;
 }
+
+.pullRequestNode {
+    margin-top: 7px;
+}
+
+.pull-request-label {
+    margin-top: 3px;
+    height: 20px;
+    padding: 0.15em 4px;
+    font-size: 12px;
+    font-weight: 600 line-height:15px;
+    border-radius: 2px;
+}
