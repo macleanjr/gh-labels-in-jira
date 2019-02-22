@@ -105,7 +105,7 @@ function populateIssueCard(card) {
                                 var label_id = $(card).data("issue-key") + "-" + pull_id + "-" + this.id;
                                 $(pullRequestNode).append("<div class=\"pull-request-label\" data-label-id=\"" + label_id + "\" style=\" background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";\">" + this.name + "</div>");
                                 if (FF_CODE_REVIEWERS && (this.name == "In Code Review" || this.name == "Ready for Code Review")) {
-                                    checkCodeReviewers(owner, repo, prid.replace("#", ""), label_id, data.requested_reviewers);
+                                    addCodeReviewers(owner, repo, prid.replace("#", ""), label_id, data.requested_reviewers);
                                 }
                             });
 
@@ -119,7 +119,7 @@ function populateIssueCard(card) {
     });
 }
 
-function checkCodeReviewers(owner, repo, prid, label_id, requested_reviewers) {
+function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers) {
     //add requested reviewers to the field
     //TODO: This won't work because the element isn't on the page yet
     /*
