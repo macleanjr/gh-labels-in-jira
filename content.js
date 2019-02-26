@@ -13,6 +13,7 @@ var PR_ICON = "<svg viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"
 var GREEN_CHECK_ICON = "<div style=\"float:right;margin-left:5px;margin-top:1px;\" class=\"code-review\"><svg class=\"octicon octicon-check text-green\" viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill=\"#28a745\" fill-rule=\"evenodd\" d=\"M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z\"></path></svg><span class=\"tooltiptext\">*TOOLTIP* approved these changes</span></div>";
 var REVIEW_PENDING = "<div style=\"float:right;margin-left:5px;margin-top:2px;\" class=\"code-review\"><svg class=\"octicon octicon-primitive-dot bg-pending\" viewBox=\"0 0 8 16\" version=\"1.1\" width=\"8\" height=\"16\" aria-hidden=\"true\"><path fill=\"#dbab09\" fill-rule=\"evenodd\" d=\"M0 8c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z\"></path></svg><span class=\"tooltiptext\">Awaiting requested review from *TOOLTIP*</span></div>";
 var CHANGES_REQUESTED = "<div style=\"float:right;margin-left:5px;margin-top:2px;\" class=\"code-review\"><svg class=\"octicon octicon-request-changes text-red\" viewBox=\"0 0 16 15\" version=\"1.1\" width=\"16\" height=\"15\" aria-hidden=\"true\"><path fill=\"#f00\" fill-rule=\"evenodd\" d=\"M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H7.5L4 15.5V12H1a1 1 0 0 1-1-1V1zm1 0v10h4v2l2-2h8V1H1zm7.5 3h2v1h-2v2h-1V5h-2V4h2V2h1v2zm2 5h-5V8h5v1z\"></path></svg><span class=\"tooltiptext\">*TOOLTIP* requested changes</span></div>";
+var COMMENTED = "<div style=\"float:right;margin-left:5px;margin-top:2px;\" class=\"code-review\"><svg class=\"octicon octicon-comment text-gray\" viewBox=\"0 0 16 16\" version=\"1.1\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M14 1H2c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1h2v3.5L7.5 11H14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 9H7l-2 2v-2H2V2h12v8z\"></path></svg><span class=\"tooltiptext\">*TOOLTIP* left review comments</span></div>";
 
 
 
@@ -137,6 +138,7 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
     }
 
     var requestedChanges = new Array();
+    var commenters = new Array();
     var url = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + prid + "/reviews?access_token=" + ACCESS_TOKEN;
     $.getJSON(url, function (data) {
         $.each(data, function () {
@@ -152,6 +154,7 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                     $("div[data-label-id='" + label_id + "']").prepend(GREEN_CHECK_ICON.replace("*TOOLTIP*", this.user.login));
 
                     requestedChanges = removeArrayItem(requestedChanges, this.user.login);
+                    commenters = removeArrayItem(commenters, this.user.login);
 
                 }
             } else if (this.state == "CHANGES_REQUESTED") {
@@ -165,9 +168,14 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                 if (addCheckmark) {
                     if (!requestedChanges.includes(this.user.login)) {
                         requestedChanges.push(this.user.login);
+                        commenters = removeArrayItem(commenters, this.user.login);
                     }
                 }
 
+            } else if (this.state == "COMMENTED") {
+                if (!commenters.includes(this.user.login)) {
+                    commenters.push(this.user.login);
+                }
             }
         });
 
@@ -175,6 +183,23 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
         if (requestedChanges.length > 0) {
             for (var i = 0; i < requestedChanges.length; i++) {
                 $("div[data-label-id='" + label_id + "']").prepend(CHANGES_REQUESTED.replace("*TOOLTIP*", requestedChanges[i]));
+            }
+        }
+
+        if (commenters.length > 0) {
+            for (var i = 0; i < commenters.length; i++) {
+
+                if (requested_reviewers.length > 0) {
+                    var found = false;
+                    for (var j = 0; j < requested_reviewers.length; j++) {
+                        console.log("comparing " + requested_reviewers[j].login.toString() + " to " + commenters[i].toString());
+                        if (requested_reviewers[j].login.toString() == commenters[i].toString())
+                            found = true;
+                    }
+                    if (!found) {
+                        $("div[data-label-id='" + label_id + "']").prepend(COMMENTED.replace("*TOOLTIP*", commenters[i]));
+                    }
+                }
             }
         }
 
