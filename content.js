@@ -139,7 +139,7 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
 
     var requestedChanges = new Array();
     var commenters = new Array();
-    var url = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + prid + "/reviews?access_token=" + ACCESS_TOKEN;
+    var url = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + prid + "/reviews?per_page=100&access_token=" + ACCESS_TOKEN;
     $.getJSON(url, function (data) {
         $.each(data, function () {
             if (this.state == "APPROVED") {
