@@ -192,10 +192,11 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                 if (requested_reviewers.length > 0) {
                     var found = false;
                     for (var j = 0; j < requested_reviewers.length; j++) {
+                        console.log("comparing" + commenters[i].toString() + " to " + pr_owner);
                         if (requested_reviewers[j].login.toString() == commenters[i].toString())
                             found = true;
                     }
-                    if (!found) {
+                    if (!found && commenters[i].toString() != pr_owner) {
                         $("div[data-label-id='" + label_id + "']").prepend(COMMENTED.replace("*TOOLTIP*", commenters[i]));
                     }
                 }
