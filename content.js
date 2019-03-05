@@ -111,7 +111,7 @@ function populateIssueCard(card) {
                                 labelNode.textContent = this.name;
 
                                 if (FF_CODE_REVIEWERS && (this.name == "In Code Review" || this.name == "Ready for Code Review")) {
-                                    addCodeReviewers(owner, repo, prid.replace("#", ""), label_id, data.requested_reviewers, labelNode);
+                                    addCodeReviewers(owner, repo, prid.replace("#", ""), label_id, data.requested_reviewers, labelNode, data.user.login);
                                 }
 
                                 $(pullRequestNode).append(labelNode);
@@ -128,7 +128,7 @@ function populateIssueCard(card) {
     });
 }
 
-function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labelNode) {
+function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labelNode, pr_owner) {
 
     //add requested reviewers to the field
     if (requested_reviewers.length > 0) {
@@ -195,7 +195,7 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                         if (requested_reviewers[j].login.toString() == commenters[i].toString())
                             found = true;
                     }
-                    if (!found) {
+                    if (!found && commenters[i].toString() != pr_owner) {
                         $("div[data-label-id='" + label_id + "']").prepend(COMMENTED.replace("*TOOLTIP*", commenters[i]));
                     }
                 }
