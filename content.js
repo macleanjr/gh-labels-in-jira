@@ -58,7 +58,7 @@ window.addEventListener("message", function (event) {
 
 function populateIssueCard(card) {
     $.getJSON("https://" + JIRA_HOSTNAME + "/rest/dev-status/1.0/issue/detail?issueId=" + $(card).attr("data-issue-id") + "&applicationType=github&dataType=pullrequest", function (data) {
-        if (data.detail[0].pullRequests.length == 0) {
+        if (data.detail.length == 0 || data.detail[0].pullRequests.length == 0) {
             // no PR's found
             if ($(card).find(".gh-labels-in-jira").length == 0)
                 $(card).find(".ghx-stat-fields .ghx-stat-1").append("<span class=\"ghx-field gh-labels-in-jira\" data-tooltip=\"0 pull requests\">" + NO_PR_ICON + "</span>");
