@@ -57,7 +57,7 @@ window.addEventListener("message", function (event) {
 });
 
 function populateIssueCard(card) {
-    $.getJSON("https://" + JIRA_HOSTNAME + "/rest/dev-status/1.0/issue/detail?issueId=" + $(card).attr("data-issue-id") + "&applicationType=github&dataType=pullrequest", function (data) {
+    $.getJSON("https://" + JIRA_HOSTNAME + "/rest/dev-status/1.0/issue/detail?issueId=" + $(card).attr("data-issue-id") + "&applicationType=GitHub&dataType=pullrequest", function (data) {
         if (data.detail.length == 0 || data.detail[0].pullRequests.length == 0) {
             // no PR's found
             if ($(card).find(".gh-labels-in-jira").length == 0)
