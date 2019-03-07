@@ -139,6 +139,8 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
 
     var requestedChanges = new Array();
     var commenters = new Array();
+    var approvers = new Array();
+
     var url = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + prid + "/reviews?per_page=100&access_token=" + ACCESS_TOKEN;
     $.getJSON(url, function (data) {
         $.each(data, function () {
@@ -151,7 +153,9 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                 }
 
                 if (addCheckmark) {
-                    $("div[data-label-id='" + label_id + "']").prepend(GREEN_CHECK_ICON.replace("*TOOLTIP*", this.user.login));
+                    if (!approvers.includes(this.user.login)) {
+                        approvers.push(this.user.login);
+                    }
 
                     requestedChanges = removeArrayItem(requestedChanges, this.user.login);
                     commenters = removeArrayItem(commenters, this.user.login);
@@ -178,6 +182,13 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                 }
             }
         });
+
+        if (approvers.length > 0) {
+            for (var i = 0; i < approvers.length; i++) {
+                $("div[data-label-id='" + label_id + "']").prepend(GREEN_CHECK_ICON.replace("*TOOLTIP*", approvers[i]));
+            }
+        }
+
 
         //now that all is looped, loop through the requestedChanges array
         if (requestedChanges.length > 0) {
