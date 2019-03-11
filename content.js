@@ -194,6 +194,8 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
         if (requestedChanges.length > 0) {
             for (var i = 0; i < requestedChanges.length; i++) {
                 $("div[data-label-id='" + label_id + "']").prepend(CHANGES_REQUESTED.replace("*TOOLTIP*", requestedChanges[i]));
+                //requested changes trumps comments
+                commenters = removeArrayItem(commenters, requestedChanges[i]);
             }
         }
 
