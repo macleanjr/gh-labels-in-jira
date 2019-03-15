@@ -83,6 +83,7 @@ function populateIssueCard(card) {
                 if (prstatus != "DECLINED" || !HIDE_CLOSED_PRS) {
                     var pullRequestNode = document.createElement("div");
                     pullRequestNode.classList.add("pullRequestNode");
+                    pullRequestNode.setAttribute("data-ticket-pull-id", $(card).data("issue-key") + "-" + prid.replace("#", ""));
 
                     $(pullRequestNode).append("<span style=\"cursor:pointer;font-size:12px;color: rgb(107, 119, 140);\" onclick=\"event.stopPropagation();window.open('" + pr_link + "', '_blank');\">" + prid + "</span>: ");
                     if (prstatus == "OPEN") {
@@ -126,6 +127,10 @@ function populateIssueCard(card) {
             });
         }
     });
+}
+
+function addLabels() {
+
 }
 
 function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labelNode, pr_owner) {
