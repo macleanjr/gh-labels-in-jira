@@ -77,14 +77,13 @@ function populateIssueCard(card) {
                 var prstatus = this.status;
                 var owner = this.url.split("/")[3];
                 var repo = this.url.split("/")[4];
-                var pr_link = "https://github.com/" + owner + "/" + repo + "/pull/" + prid.replace("#", "");
 
 
                 if (prstatus != "DECLINED" || !HIDE_CLOSED_PRS) {
                     var pullRequestNode = document.createElement("div");
                     pullRequestNode.classList.add("pullRequestNode");
 
-                    $(pullRequestNode).append("<span style=\"cursor:pointer;font-size:12px;color: rgb(107, 119, 140);\" onclick=\"event.stopPropagation();window.open('" + pr_link + "', '_blank');\">" + prid + "</span>: ");
+                    $(pullRequestNode).append("<span style=\"cursor:pointer;font-size:12px;color: rgb(107, 119, 140);\" onclick=\"event.stopPropagation();window.open('" + this.url + "', '_blank');\">" + prid + "</span>: ");
                     if (prstatus == "OPEN") {
                         $(pullRequestNode).append("<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-complete\" style=\"color:#0052cc !important;border-color:#b3d4ff !important;\">OPEN</span>");
                     } else if (prstatus == "MERGED") {
