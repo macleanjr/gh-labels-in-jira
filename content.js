@@ -84,15 +84,8 @@ function populateIssueCard(card) {
                     pullRequestNode.classList.add("pullRequestNode");
 
                     $(pullRequestNode).append("<span style=\"cursor:pointer;font-size:12px;color: rgb(107, 119, 140);\" onclick=\"event.stopPropagation();window.open('" + this.url + "', '_blank');\">" + prid + "</span>: ");
-                    if (prstatus == "OPEN") {
-                        $(pullRequestNode).append("<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-complete\" style=\"color:#0052cc !important;border-color:#b3d4ff !important;\">OPEN</span>");
-                    } else if (prstatus == "MERGED") {
-                        $(pullRequestNode).append("<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-success\">MERGED</span>");
-                    } else if (prstatus == "DECLINED") {
-                        $(pullRequestNode).append("<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-error\">DECLINED</span>");
-                    } else {
-                        $(pullRequestNode).append("<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle\">" + prstatus + "</span>");
-                    }
+
+                    $(pullRequestNode).append(prStatus(this.status));
 
                     $(pullRequestNode).append("<span style=\"font-size:10px;font-style:italic;padding-left:5px;\">" + repo + "</span><br/>");
 
@@ -125,6 +118,22 @@ function populateIssueCard(card) {
             });
         }
     });
+}
+
+function prStatus(status) {
+    switch (status) {
+        case "OPEN":
+            return "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-complete\" style=\"color:#0052cc !important;border-color:#b3d4ff !important;\">OPEN</span>";
+            break;
+        case "MERGED":
+            return "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-success\">MERGED</span>";
+            break;
+        case "DECLINED":
+            return "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-error\">DECLINED</span>";
+            break;
+        default:
+            return "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle\">" + status + "</span>";
+    }
 }
 
 function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labelNode, pr_owner) {
