@@ -36,7 +36,11 @@
 }
 
 .pullRequestNode {
-    margin-top: 7px;
+    margin-bottom: 5px;
+}
+
+.pullRequestNode:last-child {
+    margin-bottom: 0px;
 }
 
 .pull-request-label {
@@ -59,4 +63,5 @@
     color: #6c798f;
     font-weight: 500;
     font-size: 12px;
+    margin-bottom: 7px;
 }
