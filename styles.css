@@ -53,3 +53,10 @@
     font-style: italic;
     padding-left: 5px;
 }
+
+.pr-heading {
+    border-bottom: 2px solid #dfe1e6;
+    color: #6c798f;
+    font-weight: 500;
+    font-size: 12px;
+}

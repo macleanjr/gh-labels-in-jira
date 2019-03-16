@@ -70,7 +70,7 @@ function populateIssueCard(card) {
             var wrapper = $(card).find(".gh-labels-in-jira-wrapper");
 
             // heading for pull requests
-            $(wrapper).append("<div id=\"gh-labels-in-jira_prs\" style=\"border-bottom: 2px solid #dfe1e6; color: #6c798f; font-weight:500; font-size:12px;\">Pull Requests</div>");
+            $(wrapper).append("<div class=\"pr-heading\">Pull Requests</div>");
 
             $.each(data.detail[0].pullRequests, function () {
                 var prid = this.id;
