@@ -47,3 +47,9 @@
     font-weight: 600 line-height:15px;
     border-radius: 2px;
 }
+
+.repo-name {
+    font-size: 10px;
+    font-style: italic;
+    padding-left: 5px;
+}

@@ -86,7 +86,7 @@ function populateIssueCard(card) {
 
                     $(pullRequestNode).append(prStatus(this.status));
 
-                    $(pullRequestNode).append("<span style=\"font-size:10px;font-style:italic;padding-left:5px;\">" + repo + "</span><br/>");
+                    $(pullRequestNode).append("<span class=\"repo-name\">" + repo + "</span><br/>");
 
                     if (this.status != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
                         var buildURL = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + this.id.replace("#", "") + "?access_token=" + ACCESS_TOKEN;
