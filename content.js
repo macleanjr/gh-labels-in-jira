@@ -74,12 +74,11 @@ function populateIssueCard(card) {
 
             $.each(data.detail[0].pullRequests, function () {
                 var prid = this.id;
-                var prstatus = this.status;
                 var owner = this.url.split("/")[3];
                 var repo = this.url.split("/")[4];
 
 
-                if (prstatus != "DECLINED" || !HIDE_CLOSED_PRS) {
+                if (this.status != "DECLINED" || !HIDE_CLOSED_PRS) {
                     var pullRequestNode = document.createElement("div");
                     pullRequestNode.classList.add("pullRequestNode");
 
@@ -89,7 +88,7 @@ function populateIssueCard(card) {
 
                     $(pullRequestNode).append("<span style=\"font-size:10px;font-style:italic;padding-left:5px;\">" + repo + "</span><br/>");
 
-                    if (prstatus != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
+                    if (this.status != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
                         var buildURL = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + this.id.replace("#", "") + "?access_token=" + ACCESS_TOKEN;
                         $.getJSON(buildURL, function (data) {
                             var pull_id = data.id;
