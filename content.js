@@ -163,10 +163,8 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                     if (!approvers.includes(this.user.login)) {
                         approvers.push(this.user.login);
                     }
-
                     requestedChanges = removeArrayItem(requestedChanges, this.user.login);
                     commenters = removeArrayItem(commenters, this.user.login);
-
                 }
             } else if (this.state == "CHANGES_REQUESTED") {
                 //need to check to make sure the review hasn't been cleared
@@ -196,7 +194,6 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
             }
         }
 
-
         //now that all is looped, loop through the requestedChanges array
         if (requestedChanges.length > 0) {
             for (var i = 0; i < requestedChanges.length; i++) {
@@ -221,14 +218,9 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                 }
             }
         }
-
-
     });
 }
 
-const removeArrayItem = (arr, itemToRemove) => {
-    return arr.filter(item => item !== itemToRemove)
-}
 
 function addPRLabels() {
     if ($(".gh-labels-in-jira").length == 0) {
@@ -258,6 +250,12 @@ function addPRLabels() {
 
     }
     setTimeout(addPRLabels, 1500);
+}
+
+/* Helper Functions */
+
+const removeArrayItem = (arr, itemToRemove) => {
+    return arr.filter(item => item !== itemToRemove)
 }
 
 function idealTextColor(bgColor) {
