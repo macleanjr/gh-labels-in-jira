@@ -36,7 +36,11 @@
 }
 
 .pullRequestNode {
-    margin-top: 7px;
+    margin-bottom: 5px;
+}
+
+.pullRequestNode:last-child {
+    margin-bottom: 0px;
 }
 
 .pull-request-label {
@@ -46,4 +50,18 @@
     font-size: 12px;
     font-weight: 600 line-height:15px;
     border-radius: 2px;
+}
+
+.repo-name {
+    font-size: 10px;
+    font-style: italic;
+    padding-left: 5px;
+}
+
+.pr-heading {
+    border-bottom: 2px solid #dfe1e6;
+    color: #6c798f;
+    font-weight: 500;
+    font-size: 12px;
+    margin-bottom: 5px;
 }

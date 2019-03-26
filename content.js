@@ -70,35 +70,26 @@ function populateIssueCard(card) {
             var wrapper = $(card).find(".gh-labels-in-jira-wrapper");
 
             // heading for pull requests
-            $(wrapper).append("<div id=\"gh-labels-in-jira_prs\" style=\"border-bottom: 2px solid #dfe1e6; color: #6c798f; font-weight:500; font-size:12px;\">Pull Requests</div>");
+            $(wrapper).append("<div class=\"pr-heading\">Pull Requests</div>");
 
             $.each(data.detail[0].pullRequests, function () {
                 var prid = this.id;
-                var prstatus = this.status;
                 var owner = this.url.split("/")[3];
                 var repo = this.url.split("/")[4];
-                var pr_link = "https://github.com/" + owner + "/" + repo + "/pull/" + prid.replace("#", "");
 
 
-                if (prstatus != "DECLINED" || !HIDE_CLOSED_PRS) {
+                if (this.status != "DECLINED" || !HIDE_CLOSED_PRS) {
                     var pullRequestNode = document.createElement("div");
                     pullRequestNode.classList.add("pullRequestNode");
                     pullRequestNode.setAttribute("data-ticket-pull-id", $(card).data("issue-key") + "-" + prid.replace("#", ""));
 
-                    $(pullRequestNode).append("<span style=\"cursor:pointer;font-size:12px;color: rgb(107, 119, 140);\" onclick=\"event.stopPropagation();window.open('" + pr_link + "', '_blank');\">" + prid + "</span>: ");
-                    if (prstatus == "OPEN") {
-                        $(pullRequestNode).append("<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-complete\" style=\"color:#0052cc !important;border-color:#b3d4ff !important;\">OPEN</span>");
-                    } else if (prstatus == "MERGED") {
-                        $(pullRequestNode).append("<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-success\">MERGED</span>");
-                    } else if (prstatus == "DECLINED") {
-                        $(pullRequestNode).append("<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-error\">DECLINED</span>");
-                    } else {
-                        $(pullRequestNode).append("<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle\">" + prstatus + "</span>");
-                    }
+                    $(pullRequestNode).append("<span style=\"cursor:pointer;font-size:12px;color: rgb(107, 119, 140);\" onclick=\"event.stopPropagation();window.open('" + this.url + "', '_blank');\">" + prid + "</span>: ");
 
-                    $(pullRequestNode).append("<span style=\"font-size:10px;font-style:italic;padding-left:5px;\">" + repo + "</span><br/>");
+                    $(pullRequestNode).append(prStatus(this.status));
 
-                    if (prstatus != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
+                    $(pullRequestNode).append("<span class=\"repo-name\">" + repo + "</span><br/>");
+
+                    if (this.status != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
                         var buildURL = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + this.id.replace("#", "") + "?access_token=" + ACCESS_TOKEN;
                         $.getJSON(buildURL, function (data) {
                             var pull_id = data.id;
@@ -129,8 +120,21 @@ function populateIssueCard(card) {
     });
 }
 
-function addLabels() {
 
+function prStatus(status) {
+    switch (status) {
+        case "OPEN":
+            return "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-complete\" style=\"color:#0052cc !important;border-color:#b3d4ff !important;\">OPEN</span>";
+            break;
+        case "MERGED":
+            return "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-success\">MERGED</span>";
+            break;
+        case "DECLINED":
+            return "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle aui-lozenge-error\">DECLINED</span>";
+            break;
+        default:
+            return "<span class=\"aui-lozenge aui-lozenge-overflow aui-lozenge-subtle\">" + status + "</span>";
+    }
 }
 
 function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labelNode, pr_owner) {
@@ -161,10 +165,8 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                     if (!approvers.includes(this.user.login)) {
                         approvers.push(this.user.login);
                     }
-
                     requestedChanges = removeArrayItem(requestedChanges, this.user.login);
                     commenters = removeArrayItem(commenters, this.user.login);
-
                 }
             } else if (this.state == "CHANGES_REQUESTED") {
                 //need to check to make sure the review hasn't been cleared
@@ -194,7 +196,6 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
             }
         }
 
-
         //now that all is looped, loop through the requestedChanges array
         if (requestedChanges.length > 0) {
             for (var i = 0; i < requestedChanges.length; i++) {
@@ -219,14 +220,9 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                 }
             }
         }
-
-
     });
 }
 
-const removeArrayItem = (arr, itemToRemove) => {
-    return arr.filter(item => item !== itemToRemove)
-}
 
 function addPRLabels() {
     if ($(".gh-labels-in-jira").length == 0) {
@@ -256,6 +252,12 @@ function addPRLabels() {
 
     }
     setTimeout(addPRLabels, 1500);
+}
+
+/* Helper Functions */
+
+const removeArrayItem = (arr, itemToRemove) => {
+    return arr.filter(item => item !== itemToRemove)
 }
 
 function idealTextColor(bgColor) {
