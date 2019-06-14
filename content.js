@@ -225,6 +225,8 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
 
 
 function addPRLabels() {
+
+
     if ($(".gh-labels-in-jira").length == 0) {
 
         // We don't care to rebuild this list multiple times if we have
