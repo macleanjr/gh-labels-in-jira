@@ -9,10 +9,6 @@
         "matches": ["https://*.atlassian.net/secure/RapidBoard.jspa*"],
         "run_at": "document_idle"
     }],
-    "background": {
-        "scripts": ["background.js"],
-        "persistent": false
-    },
     "permissions": [
         "storage"
     ],
