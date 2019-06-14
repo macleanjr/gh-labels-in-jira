@@ -103,8 +103,8 @@ function populateIssueCard(card) {
                                 labelNode.setAttribute("data-label-id", label_id);
                                 labelNode.setAttribute("style", "background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";");
 
-                                if (FF_PRIDE && this.name.toLowerCase() == "ready to merge") {
-                                    labelNode.setAttribute("style", "background: linear-gradient(to right, orange , yellow, green, cyan, blue, violet);");
+                                if (FF_PRIDE && (new Date().getMonth() == 5) && this.name.toLowerCase() == "ready to merge") {
+                                    labelNode.setAttribute("style", "background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);color:white;");
                                 }
 
                                 labelNode.classList.add("pull-request-label");
