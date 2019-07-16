@@ -8,6 +8,7 @@ function save_options() {
     var pr_columns = document.getElementById('pr_columns').value;
     var ff_code_reviewers = document.getElementById('ff_code_reviewers').checked;
     var ff_pride = document.getElementById('ff_pride').checked;
+    var ff_travis_builds = document.getElementById('ff_travis_builds').checked;
 
     chrome.storage.sync.set({
         github_access_token: github_access_token,
@@ -15,7 +16,8 @@ function save_options() {
         hide_closed_prs: hide_closed_prs,
         pr_columns: pr_columns,
         ff_code_reviewers: ff_code_reviewers,
-        ff_pride: ff_pride
+        ff_pride: ff_pride,
+        ff_travis_builds: ff_travis_builds
     }, function () {
         // Update status to let user know options were saved.
         var status = document.getElementById('status');
@@ -35,7 +37,8 @@ function restore_options() {
         hide_closed_prs: false,
         pr_columns: 'In Review, Github Review',
         ff_code_reviewers: false,
-        ff_pride: false
+        ff_pride: false,
+        ff_travis_builds: false
     }, function (items) {
         document.getElementById('github_access_token').value = items.github_access_token;
         document.getElementById('hide_labels_on_closed_prs').checked = items.hide_labels_on_closed_prs;
@@ -43,6 +46,7 @@ function restore_options() {
         document.getElementById('pr_columns').value = items.pr_columns;
         document.getElementById('ff_code_reviewers').checked = items.ff_code_reviewers;
         document.getElementById('ff_pride').checked = items.ff_pride;
+        document.getElementById('ff_travis_builds').checked = items.ff_travis_builds;
     });
 }
 

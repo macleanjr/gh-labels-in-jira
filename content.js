@@ -6,6 +6,7 @@ var HIDE_CLOSED_PRS = false;
 var HIDE_LABELS_ON_CLOSED_PRS = true;
 var FF_CODE_REVIEWERS = false;
 var FF_PRIDE = false;
+var FF_TRAVIS_BUILDS = false;
 var JIRA_HOSTNAME = window.location.hostname;
 var PR_COLUMNS = ["In Review", "Github Review"];
 var JIRA_COLUMNS = [];
@@ -25,13 +26,15 @@ chrome.storage.sync.get({
     hide_closed_prs: false,
     pr_columns: "",
     ff_code_reviewers: false,
-    ff_pride: false
+    ff_pride: false,
+    ff_travis_builds: false
 }, function (items) {
     ACCESS_TOKEN = items.github_access_token;
     HIDE_CLOSED_PRS = items.hide_closed_prs;
     HIDE_LABELS_ON_CLOSED_PRS = items.hide_labels_on_closed_prs;
     FF_CODE_REVIEWERS = items.ff_code_reviewers;
     FF_PRIDE = items.ff_pride;
+    FF_TRAVIS_BUILDS = items.ff_travis_builds;
 
     if (items.pr_columns) {
         PR_COLUMNS = items.pr_columns
@@ -90,11 +93,17 @@ function populateIssueCard(card) {
 
                     $(pullRequestNode).append(prStatus(this.status));
 
-                    $(pullRequestNode).append("<span class=\"repo-name\">" + repo + "</span><br/>");
+                    $(pullRequestNode).append("<span class=\"repo-name\">" + repo + "</span>");
+
+                    if (FF_TRAVIS_BUILDS) {
+                        $(pullRequestNode).append("<div style=\"float:right;\" class=\"pr-travis-build\"></div>");
+                    }
+
 
                     if (this.status != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
                         var buildURL = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + this.id.replace("#", "") + "?access_token=" + ACCESS_TOKEN;
                         $.getJSON(buildURL, function (data) {
+
                             var pull_id = data.id;
                             $.each(data.labels, function () {
                                 var label_id = $(card).data("issue-key") + "-" + pull_id + "-" + this.id;
@@ -120,12 +129,50 @@ function populateIssueCard(card) {
 
                             $(wrapper).append(pullRequestNode);
 
+                            if (FF_TRAVIS_BUILDS)
+                                travisBuild(data.head.sha, $(card).data("issue-key"), data.number, data.head.repo.full_name);
+
                         });
                     }
                 }
             });
         }
     });
+}
+
+function travisBuild(sha, key, prId, repo_name) {
+    if (typeof sha !== "undefined") {
+        //add travis status
+        var pr_node_id = key + "-" + prId;
+        var url = "https://api.github.com/repos/" + repo_name + "/commits/" + sha + "/check-suites?access_token=" + ACCESS_TOKEN;
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                if (data.total_count != 0) {
+                    $.each(data.check_suites, function () {
+                        if (this.app.name == "Travis CI") {
+                            if (this.conclusion == "success") {
+                                $("div[data-ticket-pull-id='" + pr_node_id + "'] .pr-travis-build").html("<img src=\"" + chrome.runtime.getURL("assets/travis-pass.png") + "\" style=\"height:20px;width:20px;\"/>");
+                            } else if (this.conclusion == "failure") {
+                                $("div[data-ticket-pull-id='" + pr_node_id + "'] .pr-travis-build").html("<img src=\"" + chrome.runtime.getURL("assets/travis-fail.png") + "\" style=\"height:20px;width:20px;\"/>");
+                            } else {
+                                //pending
+                                $("div[data-ticket-pull-id='" + pr_node_id + "'] .pr-travis-build").html("<img src=\"" + chrome.runtime.getURL("assets/travis-pending.png") + "\" style=\"height:20px;width:20px;\"/>");
+                            }
+                        }
+                    });
+                }
+            },
+            beforeSend: setAcceptHeader
+        });
+    }
+}
+
+function setAcceptHeader(xhr) {
+    xhr.setRequestHeader('Accept', 'application/vnd.github.antiope-preview+json');
 }
 
 
