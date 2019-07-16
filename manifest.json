@@ -19,5 +19,6 @@
     },
     "icons": {
         "128": "icon128.png"
-    }
+    },
+    "web_accessible_resources": ["assets/travis-pass.png", "assets/travis-fail.png", "assets/travis-pending.png"]
 }
