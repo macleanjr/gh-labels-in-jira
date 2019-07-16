@@ -96,7 +96,7 @@ function populateIssueCard(card) {
                     $(pullRequestNode).append("<span class=\"repo-name\">" + repo + "</span><br/>");
 
                     if (FF_TRAVIS_BUILDS) {
-                        $(pullRequesNode).append("<div style=\"float:right;\" class=\"pr-travis-build\"></div>");
+                        $(pullRequestNode).append("<div style=\"float:right;\" class=\"pr-travis-build\"></div>");
                         travisBuild();
                     }
 
