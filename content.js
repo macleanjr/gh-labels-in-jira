@@ -6,6 +6,7 @@ var HIDE_CLOSED_PRS = false;
 var HIDE_LABELS_ON_CLOSED_PRS = true;
 var FF_CODE_REVIEWERS = false;
 var FF_PRIDE = false;
+var FF_TRAVIS_BUILDS = false;
 var JIRA_HOSTNAME = window.location.hostname;
 var PR_COLUMNS = ["In Review", "Github Review"];
 var JIRA_COLUMNS = [];
@@ -25,13 +26,15 @@ chrome.storage.sync.get({
     hide_closed_prs: false,
     pr_columns: "",
     ff_code_reviewers: false,
-    ff_pride: false
+    ff_pride: false,
+    ff_travis_builds: false
 }, function (items) {
     ACCESS_TOKEN = items.github_access_token;
     HIDE_CLOSED_PRS = items.hide_closed_prs;
     HIDE_LABELS_ON_CLOSED_PRS = items.hide_labels_on_closed_prs;
     FF_CODE_REVIEWERS = items.ff_code_reviewers;
     FF_PRIDE = items.ff_pride;
+    FF_TRAVIS_BUILDS = items.ff_travis_builds;
 
     if (items.pr_columns) {
         PR_COLUMNS = items.pr_columns
@@ -92,9 +95,17 @@ function populateIssueCard(card) {
 
                     $(pullRequestNode).append("<span class=\"repo-name\">" + repo + "</span><br/>");
 
+                    if (FF_TRAVIS_BUILDS) {
+                        $(pullRequesNode).append("<div style=\"float:right;\" class=\"pr-travis-build\"></div>");
+                        travisBuild();
+                    }
+
+
                     if (this.status != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
                         var buildURL = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + this.id.replace("#", "") + "?access_token=" + ACCESS_TOKEN;
                         $.getJSON(buildURL, function (data) {
+                            if (FF_TRAVIS_BUILDS)
+                                travisBuild(data.head.sha, $(card).data("issue-key"), data.number);
                             var pull_id = data.id;
                             $.each(data.labels, function () {
                                 var label_id = $(card).data("issue-key") + "-" + pull_id + "-" + this.id;
@@ -126,6 +137,12 @@ function populateIssueCard(card) {
             });
         }
     });
+}
+
+function travisBuild(sha, key, prId) {
+    console.log(sha);
+    console.log(key);
+    console.log(prId);
 }
 
 

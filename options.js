@@ -8,7 +8,7 @@ function save_options() {
     var pr_columns = document.getElementById('pr_columns').value;
     var ff_code_reviewers = document.getElementById('ff_code_reviewers').checked;
     var ff_pride = document.getElementById('ff_pride').checked;
-    var ff_travis_builds = document.getElementByid('ff_travis_builds').checked;
+    var ff_travis_builds = document.getElementById('ff_travis_builds').checked;
 
     chrome.storage.sync.set({
         github_access_token: github_access_token,
