@@ -155,12 +155,12 @@ function travisBuild(sha, key, prId, repo_name) {
                     $.each(data.check_suites, function () {
                         if (this.app.name == "Travis CI") {
                             if (this.conclusion == "success") {
-                                $("div[data-ticket-pull-id='" + pr_node_id + "'] .pr-travis-build").html("<img src=\"" + chrome.runtime.getURL("assets/travis-pass.png") + "\" style=\"height:20px;width:20px;\"/>");
+                                $("div[data-ticket-pull-id='" + pr_node_id + "'] .pr-travis-build").html("<img src=\"" + chrome.runtime.getURL("assets/travis-pass.png") + "\" style=\"height:18px;width:18px;\"/>");
                             } else if (this.conclusion == "failure") {
-                                $("div[data-ticket-pull-id='" + pr_node_id + "'] .pr-travis-build").html("<img src=\"" + chrome.runtime.getURL("assets/travis-fail.png") + "\" style=\"height:20px;width:20px;\"/>");
+                                $("div[data-ticket-pull-id='" + pr_node_id + "'] .pr-travis-build").html("<img src=\"" + chrome.runtime.getURL("assets/travis-fail.png") + "\" style=\"height:18px;width:18px;\"/>");
                             } else {
                                 //pending
-                                $("div[data-ticket-pull-id='" + pr_node_id + "'] .pr-travis-build").html("<img src=\"" + chrome.runtime.getURL("assets/travis-pending.png") + "\" style=\"height:20px;width:20px;\"/>");
+                                $("div[data-ticket-pull-id='" + pr_node_id + "'] .pr-travis-build").html("<img src=\"" + chrome.runtime.getURL("assets/travis-pending.png") + "\" style=\"height:18px;width:18px;\"/>");
                             }
                         }
                     });
