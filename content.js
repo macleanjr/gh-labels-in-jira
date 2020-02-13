@@ -132,23 +132,24 @@ function populateIssueCard(card) {
                                       $(pullRequestNode).append(labelNode);
 
                                   })
+
+                                  $(wrapper).append(pullRequestNode);
+
+                                  if (FF_TRAVIS_BUILDS)
+                                      travisBuild(data.head.sha, $(card).data("issue-key"), data.number, data.head.repo.full_name);
                                 }
                               },
                               beforeSend: setGitHubAccessHeader
                             });
 
-                            $(wrapper).append(pullRequestNode);
+                          }
 
-                            if (FF_TRAVIS_BUILDS)
-                                travisBuild(data.head.sha, $(card).data("issue-key"), data.number, data.head.repo.full_name);
-
+                        }
                         });
                     }
-                }
             });
         }
-    });
-}
+
 
 function travisBuild(sha, key, prId, repo_name) {
     if (typeof sha !== "undefined") {
