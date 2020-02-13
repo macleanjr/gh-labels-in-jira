@@ -102,29 +102,39 @@ function populateIssueCard(card) {
 
                     if (this.status != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
                         var buildURL = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + this.id.replace("#", "") + "?access_token=" + ACCESS_TOKEN;
-                        $.getJSON(buildURL, function (data) {
 
-                            var pull_id = data.id;
-                            $.each(data.labels, function () {
-                                var label_id = $(card).data("issue-key") + "-" + pull_id + "-" + this.id;
+                        $.ajax({
+                            url: buildURL,
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.total_count != 0) {
 
-                                var labelNode = document.createElement("div");
-                                labelNode.setAttribute("data-label-id", label_id);
-                                labelNode.setAttribute("style", "background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";");
+                                  var pull_id = data.id;
+                                  $.each(data.labels, function () {
+                                      var label_id = $(card).data("issue-key") + "-" + pull_id + "-" + this.id;
 
-                                if (FF_PRIDE && (new Date().getMonth() == 5) && this.name.toLowerCase() == "ready to merge") {
-                                    labelNode.setAttribute("style", "background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);color:white;");
+                                      var labelNode = document.createElement("div");
+                                      labelNode.setAttribute("data-label-id", label_id);
+                                      labelNode.setAttribute("style", "background-color: #" + this.color + ";color: " + idealTextColor("#" + this.color) + ";");
+
+                                      if (FF_PRIDE && (new Date().getMonth() == 5) && this.name.toLowerCase() == "ready to merge") {
+                                          labelNode.setAttribute("style", "background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);color:white;");
+                                      }
+
+                                      labelNode.classList.add("pull-request-label");
+                                      labelNode.textContent = this.name;
+
+                                      if (FF_CODE_REVIEWERS && (this.name == "In Code Review" || this.name == "Ready for Code Review")) {
+                                          addCodeReviewers(owner, repo, prid.replace("#", ""), label_id, data.requested_reviewers, labelNode, data.user.login);
+                                      }
+
+                                      $(pullRequestNode).append(labelNode);
+
+                                  })
                                 }
-
-                                labelNode.classList.add("pull-request-label");
-                                labelNode.textContent = this.name;
-
-                                if (FF_CODE_REVIEWERS && (this.name == "In Code Review" || this.name == "Ready for Code Review")) {
-                                    addCodeReviewers(owner, repo, prid.replace("#", ""), label_id, data.requested_reviewers, labelNode, data.user.login);
-                                }
-
-                                $(pullRequestNode).append(labelNode);
-
+                              },
+                              beforeSend: setGitHubAccessHeader
                             });
 
                             $(wrapper).append(pullRequestNode);
