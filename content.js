@@ -175,6 +175,9 @@ function setAcceptHeader(xhr) {
     xhr.setRequestHeader('Accept', 'application/vnd.github.antiope-preview+json');
 }
 
+function setGitHubAccessHeader(xhr) {
+  xhr.setRequestHeader('Authorization', 'token ' + ACCESS_TOKEN);
+}
 
 function prStatus(status) {
     switch (status) {
@@ -206,76 +209,85 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
     var approvers = new Array();
 
     var url = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + prid + "/reviews?per_page=100&access_token=" + ACCESS_TOKEN;
-    $.getJSON(url, function (data) {
-        $.each(data, function () {
-            if (this.state == "APPROVED") {
-                //need to check to make sure the review hasn't been cleared
-                var addCheckmark = true;
-                for (var i = 0; i < requested_reviewers.length; i++) {
-                    if (this.user.login == requested_reviewers[i].login)
-                        addCheckmark = false;
-                }
 
-                if (addCheckmark) {
-                    if (!approvers.includes(this.user.login)) {
-                        approvers.push(this.user.login);
-                    }
-                    requestedChanges = removeArrayItem(requestedChanges, this.user.login);
-                    commenters = removeArrayItem(commenters, this.user.login);
-                }
-            } else if (this.state == "CHANGES_REQUESTED") {
-                //need to check to make sure the review hasn't been cleared
-                var addCheckmark = true;
-                for (var i = 0; i < requested_reviewers.length; i++) {
-                    if (this.user.login == requested_reviewers[i].login)
-                        addCheckmark = false;
-                }
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            if (data.total_count != 0) {
+              $.each(data, function () {
+                  if (this.state == "APPROVED") {
+                      //need to check to make sure the review hasn't been cleared
+                      var addCheckmark = true;
+                      for (var i = 0; i < requested_reviewers.length; i++) {
+                          if (this.user.login == requested_reviewers[i].login)
+                              addCheckmark = false;
+                      }
 
-                if (addCheckmark) {
-                    if (!requestedChanges.includes(this.user.login)) {
-                        requestedChanges.push(this.user.login);
-                        commenters = removeArrayItem(commenters, this.user.login);
-                    }
-                }
+                      if (addCheckmark) {
+                          if (!approvers.includes(this.user.login)) {
+                              approvers.push(this.user.login);
+                          }
+                          requestedChanges = removeArrayItem(requestedChanges, this.user.login);
+                          commenters = removeArrayItem(commenters, this.user.login);
+                      }
+                  } else if (this.state == "CHANGES_REQUESTED") {
+                      //need to check to make sure the review hasn't been cleared
+                      var addCheckmark = true;
+                      for (var i = 0; i < requested_reviewers.length; i++) {
+                          if (this.user.login == requested_reviewers[i].login)
+                              addCheckmark = false;
+                      }
 
-            } else if (this.state == "COMMENTED") {
-                if (!commenters.includes(this.user.login)) {
-                    commenters.push(this.user.login);
-                }
-            }
-        });
+                      if (addCheckmark) {
+                          if (!requestedChanges.includes(this.user.login)) {
+                              requestedChanges.push(this.user.login);
+                              commenters = removeArrayItem(commenters, this.user.login);
+                          }
+                      }
 
-        if (approvers.length > 0) {
-            for (var i = 0; i < approvers.length; i++) {
-                $("div[data-label-id='" + label_id + "']").prepend(GREEN_CHECK_ICON.replace("*TOOLTIP*", approvers[i]));
-            }
-        }
+                  } else if (this.state == "COMMENTED") {
+                      if (!commenters.includes(this.user.login)) {
+                          commenters.push(this.user.login);
+                      }
+                  }
 
-        //now that all is looped, loop through the requestedChanges array
-        if (requestedChanges.length > 0) {
-            for (var i = 0; i < requestedChanges.length; i++) {
-                $("div[data-label-id='" + label_id + "']").prepend(CHANGES_REQUESTED.replace("*TOOLTIP*", requestedChanges[i]));
-                //requested changes trumps comments
-                commenters = removeArrayItem(commenters, requestedChanges[i]);
-            }
-        }
+                  if (approvers.length > 0) {
+                      for (var i = 0; i < approvers.length; i++) {
+                          $("div[data-label-id='" + label_id + "']").prepend(GREEN_CHECK_ICON.replace("*TOOLTIP*", approvers[i]));
+                      }
+                  }
 
-        if (commenters.length > 0) {
-            for (var i = 0; i < commenters.length; i++) {
+                  //now that all is looped, loop through the requestedChanges array
+                  if (requestedChanges.length > 0) {
+                      for (var i = 0; i < requestedChanges.length; i++) {
+                          $("div[data-label-id='" + label_id + "']").prepend(CHANGES_REQUESTED.replace("*TOOLTIP*", requestedChanges[i]));
+                          //requested changes trumps comments
+                          commenters = removeArrayItem(commenters, requestedChanges[i]);
+                      }
+                  }
 
-                if (requested_reviewers.length > 0) {
-                    var found = false;
-                    for (var j = 0; j < requested_reviewers.length; j++) {
-                        if (requested_reviewers[j].login.toString() == commenters[i].toString())
-                            found = true;
-                    }
-                    if (!found && commenters[i].toString() != pr_owner) {
-                        $("div[data-label-id='" + label_id + "']").prepend(COMMENTED.replace("*TOOLTIP*", commenters[i]));
-                    }
-                }
-            }
-        }
-    });
+                  if (commenters.length > 0) {
+                      for (var i = 0; i < commenters.length; i++) {
+
+                          if (requested_reviewers.length > 0) {
+                              var found = false;
+                              for (var j = 0; j < requested_reviewers.length; j++) {
+                                  if (requested_reviewers[j].login.toString() == commenters[i].toString())
+                                      found = true;
+                              }
+                              if (!found && commenters[i].toString() != pr_owner) {
+                                  $("div[data-label-id='" + label_id + "']").prepend(COMMENTED.replace("*TOOLTIP*", commenters[i]));
+                              }
+                          }
+                      }
+                  }
+                }) //forEach
+              } // if
+            }, // success
+    beforeSend: setGitHubAccessHeader
+  });
 }
 
 
