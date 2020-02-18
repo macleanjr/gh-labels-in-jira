@@ -101,7 +101,7 @@ function populateIssueCard(card) {
 
 
                     if (this.status != "DECLINED" || (HIDE_LABELS_ON_CLOSED_PRS == false && HIDE_CLOSED_PRS == false)) {
-                        var buildURL = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + this.id.replace("#", "") + "?access_token=" + ACCESS_TOKEN;
+                        var buildURL = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + this.id.replace("#", "");
 
                         $.ajax({
                             url: buildURL,
@@ -155,7 +155,7 @@ function travisBuild(sha, key, prId, repo_name) {
     if (typeof sha !== "undefined") {
         //add travis status
         var pr_node_id = key + "-" + prId;
-        var url = "https://api.github.com/repos/" + repo_name + "/commits/" + sha + "/check-suites?access_token=" + ACCESS_TOKEN;
+        var url = "https://api.github.com/repos/" + repo_name + "/commits/" + sha + "/check-suites";
 
         $.ajax({
             url: url,
@@ -219,7 +219,7 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
     var commenters = new Array();
     var approvers = new Array();
 
-    var url = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + prid + "/reviews?per_page=100&access_token=" + ACCESS_TOKEN;
+    var url = "https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + prid + "/reviews?per_page=100";
 
     $.ajax({
         url: url,
