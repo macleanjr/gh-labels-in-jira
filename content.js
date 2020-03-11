@@ -263,38 +263,37 @@ function addCodeReviewers(owner, repo, prid, label_id, requested_reviewers, labe
                           commenters.push(this.user.login);
                       }
                   }
-
-                  if (approvers.length > 0) {
-                      for (var i = 0; i < approvers.length; i++) {
-                          $("div[data-label-id='" + label_id + "']").prepend(GREEN_CHECK_ICON.replace("*TOOLTIP*", approvers[i]));
-                      }
-                  }
-
-                  //now that all is looped, loop through the requestedChanges array
-                  if (requestedChanges.length > 0) {
-                      for (var i = 0; i < requestedChanges.length; i++) {
-                          $("div[data-label-id='" + label_id + "']").prepend(CHANGES_REQUESTED.replace("*TOOLTIP*", requestedChanges[i]));
-                          //requested changes trumps comments
-                          commenters = removeArrayItem(commenters, requestedChanges[i]);
-                      }
-                  }
-
-                  if (commenters.length > 0) {
-                      for (var i = 0; i < commenters.length; i++) {
-
-                          if (requested_reviewers.length > 0) {
-                              var found = false;
-                              for (var j = 0; j < requested_reviewers.length; j++) {
-                                  if (requested_reviewers[j].login.toString() == commenters[i].toString())
-                                      found = true;
-                              }
-                              if (!found && commenters[i].toString() != pr_owner) {
-                                  $("div[data-label-id='" + label_id + "']").prepend(COMMENTED.replace("*TOOLTIP*", commenters[i]));
-                              }
-                          }
-                      }
-                  }
                 }) //forEach
+                if (approvers.length > 0) {
+                    for (var i = 0; i < approvers.length; i++) {
+                        $("div[data-label-id='" + label_id + "']").prepend(GREEN_CHECK_ICON.replace("*TOOLTIP*", approvers[i]));
+                    }
+                }
+
+                //now that all is looped, loop through the requestedChanges array
+                if (requestedChanges.length > 0) {
+                    for (var i = 0; i < requestedChanges.length; i++) {
+                        $("div[data-label-id='" + label_id + "']").prepend(CHANGES_REQUESTED.replace("*TOOLTIP*", requestedChanges[i]));
+                        //requested changes trumps comments
+                        commenters = removeArrayItem(commenters, requestedChanges[i]);
+                    }
+                }
+
+                if (commenters.length > 0) {
+                    for (var i = 0; i < commenters.length; i++) {
+
+                        if (requested_reviewers.length > 0) {
+                            var found = false;
+                            for (var j = 0; j < requested_reviewers.length; j++) {
+                                if (requested_reviewers[j].login.toString() == commenters[i].toString())
+                                    found = true;
+                            }
+                            if (!found && commenters[i].toString() != pr_owner) {
+                                $("div[data-label-id='" + label_id + "']").prepend(COMMENTED.replace("*TOOLTIP*", commenters[i]));
+                            }
+                        }
+                    }
+                }
               } // if
             }, // success
     beforeSend: setGitHubAccessHeader
