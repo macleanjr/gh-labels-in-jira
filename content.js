@@ -5,10 +5,12 @@ var ACCESS_TOKEN = "";
 var HIDE_CLOSED_PRS = false;
 var HIDE_LABELS_ON_CLOSED_PRS = true;
 var FF_CODE_REVIEWERS = false;
+var SHOW_ALL_COLUMNS = false;
 var FF_PRIDE = false;
 var JIRA_HOSTNAME = window.location.hostname;
 var PR_COLUMNS = ["in review", "github review"];
 var JIRA_COLUMNS = [];
+var KANBAN_COLUMNS = {};
 var MEMOIZED_CARDS = {};
 var NO_PR_ICON = "<svg viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill=\"#ccc\" fill-rule=\"evenodd\" d=\"M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z\"></path></svg>";
 var PR_ICON = "<svg viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill=\"#555\" fill-rule=\"evenodd\" d=\"M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z\"></path></svg>";
@@ -26,6 +28,7 @@ chrome.storage.sync.get({
     hide_closed_prs: false,
     pr_columns: "",
     ff_code_reviewers: false,
+    show_all_columns: false,
     ff_pride: false,
     awesome_loading: false,
 
@@ -34,6 +37,7 @@ chrome.storage.sync.get({
     HIDE_CLOSED_PRS = items.hide_closed_prs;
     HIDE_LABELS_ON_CLOSED_PRS = items.hide_labels_on_closed_prs;
     FF_CODE_REVIEWERS = items.ff_code_reviewers;
+    SHOW_ALL_COLUMNS = items.show_all_columns;
     FF_PRIDE = items.ff_pride;
     awesome_loading = items.awesome_loading;
 
@@ -304,6 +308,17 @@ function observeJiraColumns() {
     });
 };
 
+function populateKanbanColumns() {
+    $('[data-component-selector="platform-board-kit.ui.column-title"]').each(function(index) {
+        const columnText = $(this).children().first().text();
+
+        if (columnText) {
+            KANBAN_COLUMNS[index] = columnText;
+        }
+    })
+s
+}
+
 function addPRLabels() {
 
     // Don't repopulate/observe columns if we already have
@@ -313,9 +328,19 @@ function addPRLabels() {
         $.each($('[data-component-selector="platform-board-kit.ui.column.draggable-column"]'), function () {
             // I noticed that the aria labels will be the same as the column text 
             // which is what we need here. Let me know if that's too janky
-            var column_text = $(this).find('[data-component-selector="platform-board-kit.ui.column-title"]').first().attr('aria-label');
+            var columnText = $(this).find('[data-component-selector="platform-board-kit.ui.column-title"]').first().attr('aria-label');
 
-            if (column_text && PR_COLUMNS.indexOf(column_text.toLowerCase()) !== -1) {
+            // If we have no included column title, we're in a Kanban board, which is structured differently
+            // Match the column name with the column using indices
+            if (!columnText) {
+                if (!Object.keys(KANBAN_COLUMNS).length) {
+                    populateKanbanColumns()
+                }
+
+                columnText = KANBAN_COLUMNS[$(this).index()];
+            }
+
+            if (columnText && SHOW_ALL_COLUMNS || PR_COLUMNS.indexOf(columnText.toLowerCase()) !== -1) {
                 // Get an array of columns we want to watch
                 JIRA_COLUMNS.push(this);
 
